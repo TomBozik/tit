@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en" class="">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Old Money - TITs</title>
+    <link rel="stylesheet" href="tailwind.css">
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+</head>
+
+<body class="h-full min-h-screen bg-dark overflow-y-hide" x-data="alpineInstance()" x-init="init()">
+    <div class="h-full text-gray-200 p-4 lg:p-8">
+
+        <h1 class="mt-0 mb-3 font-light text-3xl" x-text="title"></h1>
+        <p class="text-xl text-gray-200 font-light mb-4" x-html="intro"></p>
+
+        <div class="flex items-center">
+            <input type="text" name="walletSearch" x-model="walletSearch" class="flex w-2/3 bg-dark focus:outline-none focus:shadow-outline border border-green-600 text-gray-200 rounded-lg py-2 px-4 appearance-none leading-normal">
+            <button type="submit" @click="fetchTITs()" class="flex bg-green-600 text-dark font-semibold py-2 px-4 rounded hover:bg-green-700 ml-2" :class="[ isLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-green-700' ]" :disabled="isLoading">
+                Search
+            </button>
+            <template x-if="isError">
+                <div class="pl-4 text-xs font-thin text-red-600" x-text="error"></div>
+            </template>
+        </div>
+
+        <!-- all vols -->
+        <div class="ml-2 pt-6 font-semibold text-sm">Volumes:</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
+            <template x-for="tit in vols" :key="tit.name">
+                <div class="bg-dark-lighter rounded-md m-2">
+                    <div x-text="tit.count" class="text-lg font-bold text-center my-1"></div>
+                    <img x-bind:src="tit.img" class="max-w-full h-auto rounded-md" />
+                    <div x-text="tit.name" class="text-lg font-semibold text-center my-1"></div>
+                </div>
+            </template>
+        </div>
+
+        <!-- vol 3 variations -->
+        <div class="ml-2 pt-6 font-semibold text-sm">LXIII variations:</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-1">
+            <template x-for="tit in vol_3_variations" :key="tit.name">
+                <div class="bg-dark-lighter rounded-md m-2">
+                    <div x-text="tit.count" class="text-lg font-bold text-center my-1"></div>
+                    <img x-bind:src="tit.img" class="max-w-full h-auto rounded-md" />
+                    <div x-text="tit.name" class="text-lg font-semibold text-center my-1"></div>
+                </div>
+            </template>
+        </div>
+
+        <!-- vol 6 variations -->
+        <div class="ml-2 pt-6 font-semibold text-sm">LXVI variations:</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
+            <template x-for="tit in vol_6_variations" :key="tit.name">
+                <div class="bg-dark-lighter rounded-md m-2">
+                    <div x-text="tit.count" class="text-lg font-bold text-center my-1"></div>
+                    <img x-bind:src="tit.img" class="max-w-full h-auto rounded-md" />
+                    <div x-text="tit.name" class="text-lg font-semibold text-center my-1"></div>
+                </div>
+            </template>
+        </div>
+  
+    </div>
+
+    <div class="flex flex-col text-center text-xs text-gray-500" x-ref="Bill999">
+        <div>Tombo#8428 / <a href="https://www.oldmoney.io/xesserson-house?user=s041byfpJqa9QQwNnt5YAzsq8sxO7ciQ" target="_blank" class="hover:text-green-600">Mfer. Tombo</a></div>
+    </div>
+</body>
+
+</html>
+
+<script>
+    function alpineInstance() {
+        return {
+            title: 'Old Money - TITs',
+            intro: 'Type the <code class="text-md text-green-600">address/$handle</code> of your Cardano wallet:',
+            walletSearch: localStorage.getItem("address") || '',
+            policyId: 'a4c45615825acae7c4937ee4d45d2ff9a29328084e2dc34bf4af37b2',
+            isLoading: false,
+            isError: false,
+            error: '',
+            vols: [],
+            vol_3_variations: [],
+            vol_6_variations: [],
+            init(){
+                this.resetCounts()
+            },
+            async fetchTITs() {
+                this.resetCounts();
+                this.isLoading = true;
+                await fetch(`https://pool.pm/wallet/${this.walletSearch}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            this.isLoading = false;
+                            this.error = `Error: ${response.status} - ${response.statusText}`
+                            this.isError = true;
+                        }
+                        return response.json()
+                    })
+                    .then((data) => {
+                        let tokens = data.tokens;
+                        let tits = tokens.filter(unit => { return unit.policy === this.policyId });
+    
+                        tits.forEach(tit => {
+                            let vol = tit.metadata.Volume;
+                            switch(vol){
+                                case 'LXI':
+                                    this.updateCount(vol);
+                                    break;
+                                case 'LXII':
+                                    this.updateCount(vol);
+                                    break;
+                                case 'LXIII':
+                                    this.updateCount(vol);
+                                    this.updateVol3Count(tit.name);
+                                    break;
+                                case 'LXIV':
+                                    this.updateCount(vol);
+                                    break;
+                                case 'LXV':
+                                    this.updateCount(vol);
+                                    break;
+                                case 'LXVI':
+                                    this.updateCount(vol);
+                                    this.updateVol6Count(tit.name);
+                                    break;
+                                default:
+                                    console.log('What is this mfer?');
+                            }
+                        });
+
+                        this.isLoading = false;
+                        this.isError = false;
+                        localStorage.setItem('address', this.walletSearch);
+                    }).catch(function (err) {
+                        console.log(err);
+                    });
+            },
+            updateCount(name){
+                this.vols.find((vol, i) => {
+                    if (vol.name === name) {
+                        this.vols[i] = { name: this.vols[i].name, img: this.vols[i].img, count: this.vols[i].count + 1};
+                        return true;
+                    }
+                });
+            },
+            updateVol3Count(name){
+                let variation = name.match(/LXIII(.*)/);
+                let variation_name = 'LXIII ' + variation[1][0];
+                this.vol_3_variations.find((vol, i) => {
+                    if (vol.name === variation_name) {
+                        this.vol_3_variations[i] = { name: this.vol_3_variations[i].name, img: this.vol_3_variations[i].img, count: this.vol_3_variations[i].count + 1};
+                        return true;
+                    }
+                });
+            },
+            updateVol6Count(name){
+                let variation_name = '';
+                if(name.includes('POOP')){
+                    variation_name = 'LXVI POOP';
+                } else if(name.includes('Dhore')){
+                    variation_name = 'LXVI DIC';
+                } else {
+                    variation_name = 'LXVI TIT';
+                }
+               
+                this.vol_6_variations.find((vol, i) => {
+                    if (vol.name === variation_name) {
+                        this.vol_6_variations[i] = { name: this.vol_6_variations[i].name, img: this.vol_6_variations[i].img, count: this.vol_6_variations[i].count + 1};
+                        return true;
+                    }
+                });
+            },
+            resetCounts(){
+                this.vols = [...this.vols_empty];
+                this.vol_3_variations = [...this.vol_3_variations_empty];
+                this.vol_6_variations = [...this.vol_6_variations_empty];
+            },
+            vols_empty: [
+                {'name': 'LXI', 'img': 'img/LXI.jpg', 'count': 0},
+                {'name': 'LXII', 'img': 'img/LXII.jpg', 'count': 0}, 
+                {'name': 'LXIII', 'img': 'img/LXIII.jpg', 'count': 0}, 
+                {'name': 'LXIV', 'img': 'img/LXIV.jpg', 'count': 0}, 
+                {'name': 'LXV', 'img': 'img/LXV.jpg', 'count': 0}, 
+                {'name': 'LXVI', 'img': 'img/LXVI.jpg', 'count': 0}, 
+            ],
+            vol_3_variations_empty: [
+                {'name': 'LXIII 0', 'img': 'img/LXIII - 0.jpg', 'count': 0},
+                {'name': 'LXIII 1', 'img': 'img/LXIII - 1.jpg', 'count': 0}, 
+                {'name': 'LXIII 2', 'img': 'img/LXIII - 2.jpg', 'count': 0}, 
+                {'name': 'LXIII 3', 'img': 'img/LXIII - 3.jpg', 'count': 0}, 
+                {'name': 'LXIII 4', 'img': 'img/LXIII - 4.jpg', 'count': 0}, 
+                {'name': 'LXIII 5', 'img': 'img/LXIII - 5.jpg', 'count': 0},
+                {'name': 'LXIII 6', 'img': 'img/LXIII - 6.jpg', 'count': 0}, 
+            ],
+            vol_6_variations_empty: [
+                {'name': 'LXVI TIT', 'img': 'img/LXVI.jpg', 'count': 0},
+                {'name': 'LXVI DIC', 'img': 'img/DIC.jpg', 'count': 0}, 
+                {'name': 'LXVI POOP', 'img': 'img/POOP.jpg', 'count': 0}, 
+            ],
+
+        }
+    }
+</script>
