@@ -28,7 +28,7 @@
 
         <!-- all vols -->
         <div class="ml-2 pt-6 font-semibold text-sm">Volumes:</div>
-        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-1">
             <template x-for="tit in vols" :key="tit.name">
                 <div class="bg-dark-lighter rounded-md m-2">
                     <div x-text="tit.count" class="text-lg font-bold text-center my-1"></div>
@@ -61,6 +61,18 @@
                 </div>
             </template>
         </div>
+
+        <!-- vol 7 variations -->
+        <div class="ml-2 pt-6 font-semibold text-sm">LXVII variations:</div>
+        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-1">
+            <template x-for="tit in vol_7_variations" :key="tit.name">
+                <div class="bg-dark-lighter rounded-md m-2">
+                    <div x-text="tit.count" class="text-lg font-bold text-center my-1"></div>
+                    <img x-bind:src="tit.img" class="max-w-full h-auto rounded-md" />
+                    <div x-text="tit.name" class="text-lg font-semibold text-center my-1"></div>
+                </div>
+            </template>
+        </div>
   
     </div>
 
@@ -84,6 +96,7 @@
             vols: [],
             vol_3_variations: [],
             vol_6_variations: [],
+            vol_7_variations: [],
             init(){
                 this.resetCounts()
             },
@@ -125,6 +138,10 @@
                                 case 'LXVI':
                                     this.updateCount(vol);
                                     this.updateVol6Count(tit.name);
+                                    break;
+                                case 'LXVII':
+                                    this.updateCount(vol);
+                                    this.updateVol7Count(tit.metadata.Variation);
                                     break;
                                 default:
                                     console.log('What is this mfer?');
@@ -173,10 +190,28 @@
                     }
                 });
             },
+            updateVol7Count(variation){
+                let variation_name = '';
+                if(variation.includes('Shadow')){
+                    variation_name = 'LXVII SHADOW';
+                } else if(variation.includes('Hoodro')){
+                    variation_name = 'LXVII HOODRO';
+                } else {
+                    variation_name = 'LXVII TRIXSON';
+                }
+               
+                this.vol_7_variations.find((vol, i) => {
+                    if (vol.name === variation_name) {
+                        this.vol_7_variations[i] = { name: this.vol_7_variations[i].name, img: this.vol_7_variations[i].img, count: this.vol_7_variations[i].count + 1};
+                        return true;
+                    }
+                });
+            },
             resetCounts(){
                 this.vols = [...this.vols_empty];
                 this.vol_3_variations = [...this.vol_3_variations_empty];
                 this.vol_6_variations = [...this.vol_6_variations_empty];
+                this.vol_7_variations = [...this.vol_7_variations_empty];
             },
             vols_empty: [
                 {'name': 'LXI', 'img': 'img/LXI.jpg', 'count': 0},
@@ -184,7 +219,8 @@
                 {'name': 'LXIII', 'img': 'img/LXIII.jpg', 'count': 0}, 
                 {'name': 'LXIV', 'img': 'img/LXIV.jpg', 'count': 0}, 
                 {'name': 'LXV', 'img': 'img/LXV.jpg', 'count': 0}, 
-                {'name': 'LXVI', 'img': 'img/LXVI.jpg', 'count': 0}, 
+                {'name': 'LXVI', 'img': 'img/LXVI.jpg', 'count': 0},
+                {'name': 'LXVII', 'img': 'img/LXVII.jpg', 'count': 0}, 
             ],
             vol_3_variations_empty: [
                 {'name': 'LXIII 0', 'img': 'img/LXIII - 0.jpg', 'count': 0},
@@ -199,6 +235,11 @@
                 {'name': 'LXVI TIT', 'img': 'img/LXVI.jpg', 'count': 0},
                 {'name': 'LXVI DIC', 'img': 'img/DIC.jpg', 'count': 0}, 
                 {'name': 'LXVI POOP', 'img': 'img/POOP.jpg', 'count': 0}, 
+            ],
+            vol_7_variations_empty: [
+                {'name': 'LXVII SHADOW', 'img': 'img/LXVII.jpg', 'count': 0},
+                {'name': 'LXVII HOODRO', 'img': 'img/HOODRO.jpg', 'count': 0}, 
+                {'name': 'LXVII TRIXSON', 'img': 'img/TRIXSON.jpg', 'count': 0}, 
             ],
 
         }
